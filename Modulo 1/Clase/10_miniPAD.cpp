@@ -139,7 +139,7 @@ int main() {
 
                 ofstream archivo;
 
-                archivo.open("sesiones_pad_bienestar.txt");
+                archivo.open("sesiones_pad_bienestar.txt",ios::app);
 
                 if (!archivo) {
                     cout << "Error al crear el archivo." << endl;

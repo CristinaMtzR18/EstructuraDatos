@@ -1,0 +1,16 @@
+BITACORA DE SESIONES PAD-BIENESTAR
+-----------------------------------
+Sesion 1
+ID usuario: 34
+Nombre: Cris 2
+Hora de inicio: 56
+Equipo asignado: 12
+-----------------------------
+BITACORA DE SESIONES PAD-BIENESTAR
+-----------------------------------
+Sesion 1
+ID usuario: 56
+Nombre: cris 3
+Hora de inicio: 14:00
+Equipo asignado: 67
+-----------------------------
