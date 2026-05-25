@@ -1,0 +1,414 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estructuras de Datos en C++ - Módulo 1</title>
+    <style>
+        /* Variables CSS3 para el diseño */
+        :root {
+            --primary-color: #004b87; /* Azul institucional */
+            --secondary-color: #f1f8ff;
+            --accent-color: #d32f2f;
+            --text-color: #333;
+            --code-bg: #2d2d2d;
+            --code-text: #f8f8f2;
+        }
+
+        /* Estilos Generales CSS3 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fafafa;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        section {
+            background: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+        section:hover {
+            transform: translateY(-5px);
+        }
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+        h3 {
+            color: var(--accent-color);
+            margin-top: 1.5rem;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .analogy {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            border-radius: 8px;
+            font-style: italic;
+            margin-top: 1rem;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        /* --- ANIMACIONES CSS3 --- */
+        .animation-container {
+            width: 100%;
+            height: 120px;
+            background: #eef2f5;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 1. Animación: Tipos vs Estructuras (Datos dispersos agrupándose) */
+        .data-dot {
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            position: absolute;
+            animation: groupData 3s infinite alternate ease-in-out;
+        }
+        .d1 { left: 20%; top: 20%; }
+        .d2 { left: 80%; top: 20%; }
+        .d3 { left: 50%; top: 80%; }
+        .structure-box {
+            width: 100px;
+            height: 100px;
+            border: 3px dashed var(--primary-color);
+            border-radius: 10px;
+            position: absolute;
+            opacity: 0;
+            animation: showBox 3s infinite alternate ease-in-out;
+        }
+        @keyframes groupData {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(calc(50vw - 50%), calc(60px - 50%)); left: 50%; top: 50%; }
+        }
+        @keyframes showBox {
+            0%, 50% { opacity: 0; transform: scale(1.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 2. Animación: Arreglos Estáticos (Llenado secuencial) */
+        .array-grid {
+            display: flex;
+            gap: 5px;
+        }
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            animation: fillArray 4s infinite;
+            opacity: 0.3;
+        }
+        .array-cell:nth-child(1) { animation-delay: 0s; }
+        .array-cell:nth-child(2) { animation-delay: 0.5s; }
+        .array-cell:nth-child(3) { animation-delay: 1s; }
+        .array-cell:nth-child(4) { animation-delay: 1.5s; }
+        .array-cell:nth-child(5) { animation-delay: 2s; }
+        @keyframes fillArray {
+            0%, 10% { background: white; opacity: 0.3; transform: scale(1); }
+            20%, 80% { background: var(--primary-color); opacity: 1; transform: scale(1.1); }
+            100% { background: white; opacity: 0.3; transform: scale(1); }
+        }
+
+        /* 3. Animación: Struct (Ensamblando una ficha) */
+        .struct-card {
+            width: 120px;
+            height: 80px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .struct-line {
+            height: 10px;
+            background: var(--accent-color);
+            margin: 10px;
+            border-radius: 5px;
+            width: 0;
+            animation: drawLine 3s infinite;
+        }
+        .struct-line:nth-child(2) { background: var(--primary-color); animation-delay: 0.5s; }
+        .struct-line:nth-child(3) { background: #555; animation-delay: 1s; }
+        @keyframes drawLine {
+            0% { width: 0; }
+            50%, 100% { width: 80%; }
+        }
+
+        /* 4. Animación: Cola FIFO (Elementos avanzando) */
+        .queue-track {
+            display: flex;
+            width: 200px;
+            border-bottom: 3px solid var(--primary-color);
+            border-top: 3px solid var(--primary-color);
+            padding: 10px 0;
+            overflow: hidden;
+            position: relative;
+            height: 60px;
+        }
+        .queue-item {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-color);
+            border-radius: 8px;
+            position: absolute;
+            left: -50px;
+            animation: fifoMove 3s infinite linear;
+        }
+        .queue-item:nth-child(2) { animation-delay: 1s; background: var(--primary-color); }
+        .queue-item:nth-child(3) { animation-delay: 2s; background: #555; }
+        @keyframes fifoMove {
+            0% { left: -50px; }
+            100% { left: 250px; }
+        }
+
+        /* 5. Animación: Persistencia (Guardando en disco) */
+        .ram-disk {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .ram, .disk {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: white;
+        }
+        .data-packet {
+            width: 15px;
+            height: 15px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: saveData 2s infinite ease-in-out;
+        }
+        @keyframes saveData {
+            0% { transform: translateX(-40px) scale(1); opacity: 1; }
+            50% { transform: translateX(0) scale(1.5); opacity: 1; }
+            100% { transform: translateX(40px) scale(0); opacity: 0; }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Estructuras de Datos: Módulo 1</h1>
+        <p>Fundamentos, Arreglos y Persistencia en C++</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Estructuras de Datos vs. Tipos de Datos</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Los tipos de datos básicos describen un valor individual. En contraste, una estructura de datos organiza, manipula y almacena datos en memoria para usarlos eficientemente. En C++ esto evoluciona hacia Tipos de Datos Abstractos (TDA) usando clases y objetos.</p>
+            
+            <div class="animation-container">
+                <div class="d1 data-dot"></div>
+                <div class="d2 data-dot"></div>
+                <div class="d3 data-dot"></div>
+                <div class="structure-box"></div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+
+int main() {
+    // Tipo de dato primitivo
+    int id_usuario = 101; 
+
+    // Estructura de datos (Vector dinámico)
+    std::vector&lt;std::string&gt; sesiones_activas;
+    sesiones_activas.push_back("Usuario 101 - Equipo 1"); 
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> <code>id_usuario</code> es un dato primitivo simple <code>int</code>. <code>sesiones_activas</code> es un <code>std::vector</code> que agrupa múltiples cadenas de texto, organizando las sesiones del PAD-Bienestar.</p>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> Preparar un pastel. Los tipos de datos son los ingredientes sueltos en tu mesa. La estructura de datos es la receta maestra terminada y organizada.</div>
+        </section>
+
+        <section>
+            <h2>2. Arreglos (Las bases estáticas)</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Almacenan múltiples valores de manera secuencial y contigua. Su principal limitación es que su tamaño es rígido. En C++, el contenedor <code>std::array</code> encapsula el arreglo estático para evitar desbordamientos, pero mantiene esta naturaleza inmutable.</p>
+            
+            <div class="animation-container">
+                <div class="array-grid">
+                    <div class="array-cell"></div>
+                    <div class="array-cell"></div>
+                    <div class="array-cell"></div>
+                    <div class="array-cell"></div>
+                    <div class="array-cell"></div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;array&gt;
+
+int main() {
+    // Límite físico fijo de 5 equipos
+    std::array&lt;bool, 5&gt; equipos = {true, true, false, true, false};
+    std::cout &lt;&lt; "Total equipos: " &lt;&lt; equipos.size() &lt;&lt; std::endl;
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> <code>equipos</code> es un <code>std::array</code> con un tamaño inamovible de 5, simulando las computadoras de la biblioteca. Protege de acceder a un "equipo 6" inexistente.</p>
+            <div class="analogy">🧁 <strong>De la vida cotidiana:</strong> Un molde metálico para cupcakes. Si tiene 6 espacios, esa es su capacidad máxima. No puedes estirar el metal para meter un séptimo panecillo.</div>
+        </section>
+
+        <section>
+            <h2>3. Tipos de Dato Definidos por el Usuario (struct)</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Permiten agrupar múltiples variables de distintos tipos bajo un mismo nombre. En C++, un <code>struct</code> posee capacidades idénticas a una clase, pudiendo incluir constructores y métodos.</p>
+            
+            <div class="animation-container">
+                <div class="struct-card">
+                    <div class="struct-line"></div>
+                    <div class="struct-line"></div>
+                    <div class="struct-line"></div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+struct SesionPAD {
+    int id_usuario;
+    std::string tramite;
+
+    SesionPAD(int id, std::string t) : id_usuario(id), tramite(t) {}
+
+    void mostrarEstado() {
+        std::cout &lt;&lt; "Usuario " &lt;&lt; id_usuario &lt;&lt; ": " &lt;&lt; tramite &lt;&lt; "\n";
+    }
+};
+
+int main() {
+    SesionPAD sesion(405, "Acta de Nacimiento");
+    sesion.mostrarEstado(); 
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> Definimos <code>SesionPAD</code> agrupando atributos. Agregamos un constructor para inicializar los datos y un método <code>mostrarEstado()</code> para encapsular su comportamiento.</p>
+            <div class="analogy">🧙‍♀️ <strong>De la vida cotidiana:</strong> Una ficha de diseño de Hana chan. En lugar de tener sus datos en hojas separadas, el <code>struct</code> concentra todos sus atributos mágicos en una sola plantilla organizada.</div>
+        </section>
+
+        <section>
+            <h2>4. Estructuras Lineales Estáticas (Colas)</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Para administrar turnos, las colas siguen el principio FIFO (el primero en entrar es el primero en salir). En C++, se implementa con <code>std::queue</code>.</p>
+            
+            <div class="animation-container">
+                <div class="queue-track">
+                    <div class="queue-item"></div>
+                    <div class="queue-item"></div>
+                    <div class="queue-item"></div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;queue&gt;
+#include &lt;string&gt;
+
+int main() {
+    std::queue&lt;std::string&gt; cola_atencion;
+    
+    cola_atencion.push("Usuario Estudiante"); 
+    cola_atencion.push("Usuario Trámite INE"); 
+
+    std::cout &lt;&lt; "Turno: " &lt;&lt; cola_atencion.front() &lt;&lt; std::endl;
+    cola_atencion.pop(); // FIFO
+    
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> <code>.push()</code> encola a los usuarios en el orden de llegada. <code>.front()</code> indica quién está adelante, y <code>.pop()</code> desencola al primero respetando el principio FIFO.</p>
+            <div class="analogy">☕ <strong>De la vida cotidiana:</strong> La fila de una cafetería (FIFO). El primer auto que llega al autoservicio es el primero en recibir su pedido. (En una Pila LIFO, sería como una torre de hot cakes).</div>
+        </section>
+
+        <section>
+            <h2>5. Persistencia de Datos</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Es la capacidad de almacenar información permanentemente en el disco físico. C++ maneja esto a través de flujos de objetos con la biblioteca <code>&lt;fstream&gt;</code>.</p>
+            
+            <div class="animation-container">
+                <div class="ram-disk">
+                    <div class="ram">RAM</div>
+                    <div class="data-packet"></div>
+                    <div class="disk">HDD</div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+
+int main() {
+    std::ofstream bitacora("bitacora_PAD.txt");
+    
+    if (bitacora.is_open()) {
+        bitacora &lt;&lt; "09:00 AM - Se abre el módulo PAD-Bienestar.\n";
+        bitacora.close(); 
+        std::cout &lt;&lt; "Guardado en disco.\n";
+    }
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> <code>std::ofstream</code> abre un flujo de escritura hacia el disco duro. Tras inyectar los datos, invocamos <code>.close()</code> para asegurar que la información no se corrompa.</p>
+            <div class="analogy">💾 <strong>De la vida cotidiana:</strong> Tras horas redactando tus rúbricas, la información vive en la RAM (volátil). La persistencia ocurre al hacer clic en "Guardar", transfiriéndolas al disco duro de forma permanente.</div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Material de apoyo académico. Licenciatura en Tecnologías de la Información.</p>
+    </footer>
+
+</body>
+</html>

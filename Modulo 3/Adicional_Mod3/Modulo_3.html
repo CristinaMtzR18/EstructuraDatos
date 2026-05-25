@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 3: Estructuras No Lineales</title>
+    <style>
+        :root {
+            --primary: #004b87; 
+            --secondary: #f1f8ff;
+            --accent: #d32f2f;
+            --text: #333;
+            --code-bg: #2d2d2d;
+            --code-txt: #f8f8f2;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fafafa; color: var(--text); line-height: 1.6; }
+        header { background: var(--primary); color: white; text-align: center; padding: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        main { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        section { background: white; margin-bottom: 2rem; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 6px solid var(--primary); }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        h3 { color: var(--accent); margin-top: 1.5rem; font-size: 1.1rem; }
+        pre { background: var(--code-bg); color: var(--code-txt); padding: 1.5rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .analogy { background: var(--secondary); padding: 1.2rem; border-radius: 8px; font-style: italic; border-left: 4px solid var(--accent); margin-top: 1.5rem; }
+        
+        /* Contenedores de Animación (Fijos para evitar rupturas) */
+        .anim-container { height: 180px; background: #eef2f5; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; margin: 1.5rem 0; }
+        .canvas-box { position: relative; width: 240px; height: 140px; }
+
+        /* 1. Árbol y Jerarquía (Geometría Exacta) */
+        .tree-node { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; position: absolute; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px; z-index: 2; animation: popIn 2s infinite alternate; }
+        .t-root { top: 10px; left: 100px; } /* Centro en 120, 30 */
+        .t-L { top: 90px; left: 20px; animation-delay: 0.5s; } /* Centro en 40, 110 */
+        .t-R { top: 90px; left: 180px; animation-delay: 0.5s; } /* Centro en 200, 110 */
+        
+        .t-line { position: absolute; background: var(--accent); width: 2px; height: 113px; z-index: 1; top: 30px; left: 119px; transform-origin: top center; }
+        .l-left { transform: rotate(45deg); animation: drawLine 2s infinite alternate; }
+        .l-right { transform: rotate(-45deg); animation: drawLine 2s infinite alternate; }
+        
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes drawLine { 0% { height: 0; } 100% { height: 113px; } }
+
+        /* 2. Árbol Binario de Búsqueda (ABB) con pulso de búsqueda */
+        .abb-dot { position: absolute; width: 14px; height: 14px; background: orange; border-radius: 50%; z-index: 3; animation: abbSearch 3s infinite; }
+        .abb-label { position: absolute; font-size: 12px; font-weight: bold; color: var(--text); background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--accent); z-index: 3;}
+        .lbl-root { top: -15px; left: 80px; }
+        .lbl-L { top: 135px; left: 5px; }
+        .lbl-R { top: 135px; left: 165px; opacity: 0.3; } /* Opaco porque no va por ahí */
+        
+        @keyframes abbSearch { 
+            0%, 20% { top: 23px; left: 113px; opacity: 1; } /* Inicia en Raíz */
+            50%, 80% { top: 103px; left: 33px; opacity: 1; } /* Llega a Izq */
+            100% { opacity: 0; }
+        }
+
+        /* 3. Grafo de Red (Geometría Exacta) */
+        .graph-node { width: 40px; height: 40px; background: white; border: 3px solid var(--primary); color: var(--primary); border-radius: 50%; position: absolute; z-index: 2; display:flex; justify-content:center; align-items:center; font-size: 12px; font-weight: bold;}
+        .g1 { top: 20px; left: 40px; } /* Centro en 60, 40 */
+        .g2 { top: 20px; left: 160px; } /* Centro en 180, 40 */
+        .g3 { top: 90px; left: 100px; } /* Centro en 120, 110 */
+        
+        .g-edge { position: absolute; background: var(--accent); height: 2px; z-index: 1; transform-origin: left center; animation: pulseEdge 2s infinite alternate; }
+        .e1 { top: 39px; left: 60px; width: 120px; } /* Conecta G1 a G2 */
+        .e2 { top: 39px; left: 60px; width: 92px; transform: rotate(49.4deg); animation-delay: 0.5s;} /* Conecta G1 a G3 */
+        .e3 { top: 39px; left: 180px; width: 92px; transform: rotate(130.6deg); animation-delay: 1s;} /* Conecta G2 a G3 */
+        
+        @keyframes pulseEdge { 0% { opacity: 0.2; } 100% { opacity: 1; box-shadow: 0 0 6px var(--accent); } }
+
+        /* 4. Lista de Adyacencia */
+        .adj-list { display: flex; flex-direction: column; gap: 10px; width: 60%; margin: 0 auto; margin-top: 20px;}
+        .adj-row { display: flex; align-items: center; gap: 10px; }
+        .adj-head { background: var(--primary); color: white; padding: 5px 15px; border-radius: 4px; font-weight: bold; }
+        .adj-link { background: var(--secondary); border: 1px solid var(--primary); padding: 5px 15px; border-radius: 4px; animation: slideIn 2s infinite alternate; }
+        @keyframes slideIn { 0% { transform: translateX(-15px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Módulo 3: Estructuras No Lineales</h1>
+        <p>Árboles y Grafos en C++ (Enfoque POO)</p>
+    </header>
+    <main>
+        
+        <section>
+            <h2>1. Árboles y Árboles Binarios</h2>
+            <p><strong>Teoría:</strong> Las estructuras jerárquicas se modelan con árboles, utilizando nodos conectados por relaciones padre-hijo. Un Árbol Binario restringe esto a dos ramificaciones máximas (izquierda y derecha).</p>
+            
+            <div class="anim-container">
+                <div class="canvas-box">
+                    <div class="t-line l-left"></div>
+                    <div class="t-line l-right"></div>
+                    <div class="tree-node t-root">Raíz</div>
+                    <div class="tree-node t-L">Izq</div>
+                    <div class="tree-node t-R">Der</div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código:</h3>
+<pre><code>class NodoArbol {
+public:
+    std::string area_pad;
+    NodoArbol* izquierdo;
+    NodoArbol* derecho;
+    NodoArbol(std::string area) : area_pad(area), izquierdo(nullptr), derecho(nullptr) {}
+};</code></pre>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> Un árbol genealógico. Tus abuelos son la raíz, tus padres los nodos intermedios, y tú eres el nodo hoja (el final de la rama).</div>
+        </section>
+
+        <section>
+            <h2>2. Árbol Binario de Búsqueda (ABB)</h2>
+            <p><strong>Teoría:</strong> Es una estructura donde los valores menores van a la rama izquierda y los mayores a la derecha. Esto optimiza la búsqueda al descartar mitades enteras de datos en cada paso.</p>
+            
+            <div class="anim-container">
+                <div class="canvas-box">
+                    <div class="abb-label lbl-root">Buscando: 30</div>
+                    <div class="t-line l-left" style="animation: none;"></div>
+                    <div class="t-line l-right" style="animation: none; opacity: 0.3;"></div>
+                    
+                    <div class="tree-node t-root">50</div>
+                    <div class="tree-node t-L">30</div>
+                    <div class="tree-node t-R" style="opacity: 0.3;">70</div>
+                    
+                    <div class="abb-dot"></div>
+                    
+                    <div class="abb-label lbl-L">&lt; 50 (Va a Izq)</div>
+                    <div class="abb-label lbl-R">&gt; 50</div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>NodoABB* insertar(NodoABB* raiz, int folio) {
+    if (raiz == nullptr) return new NodoABB(folio);
+    if (folio &lt; raiz-&gt;folio_turno) 
+        raiz-&gt;izq = insertar(raiz-&gt;izq, folio); // Menores a Izquierda
+    else if (folio &gt; raiz-&gt;folio_turno) 
+        raiz-&gt;der = insertar(raiz-&gt;der, folio); // Mayores a Derecha
+    return raiz;
+}</code></pre>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> Un archivero alfabético. Si buscas el expediente de "Hana chan" en el cajón de la "M", sabes inmediatamente que debes buscar hacia la izquierda, ignorando el lado derecho.</div>
+        </section>
+
+        <section>
+            <h2>3. Grafos (Redes e Interconexiones)</h2>
+            <p><strong>Teoría:</strong> Modelan relaciones complejas sin jerarquía estricta. Están compuestos por nodos y aristas (conexiones). Si la conexión es bidireccional es No Dirigido; si tiene un solo sentido, es Dirigido.</p>
+            
+            <div class="anim-container">
+                <div class="canvas-box">
+                    <div class="g-edge e1"></div>
+                    <div class="g-edge e2"></div>
+                    <div class="g-edge e3"></div>
+                    <div class="graph-node g1">PC-1</div>
+                    <div class="graph-node g2">PC-2</div>
+                    <div class="graph-node g3">Serv</div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>class RedComputadoras {
+public:
+    std::vector&lt;std::string&gt; equipos = {"PC-1", "PC-2", "Servidor"};
+    // Matriz de adyacencia (Conexiones bidireccionales PAD-Bienestar)
+    int conexiones[3][3] = {
+        {0, 1, 1}, // PC-1 conectada a PC-2 y Servidor
+        {1, 0, 1}, // PC-2 conectada a PC-1 y Servidor
+        {1, 1, 0}  // Servidor conectado a PC-1 y PC-2
+    };
+};</code></pre>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> El mapa del metro es un grafo no dirigido (vas y vienes por la misma vía). Seguir a alguien en Twitter es un grafo dirigido (tú puedes seguir a alguien sin que te sigan de vuelta).</div>
+        </section>
+
+        <section>
+            <h2>4. Representación: Lista de Adyacencia</h2>
+            <p><strong>Teoría:</strong> En lugar de una matriz llena de ceros (que gasta RAM), la Lista de Adyacencia usa vectores dinámicos en C++ para guardar únicamente las conexiones que sí existen, optimizando la memoria.</p>
+            
+            <div class="anim-container">
+                <div class="adj-list">
+                    <div class="adj-row">
+                        <div class="adj-head">PC-1</div>
+                        <div class="adj-link">PC-2</div>
+                        <div class="adj-link" style="animation-delay: 0.5s">Servidor</div>
+                    </div>
+                    <div class="adj-row">
+                        <div class="adj-head">PC-2</div>
+                        <div class="adj-link" style="animation-delay: 1s">PC-1</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código:</h3>
+<pre><code>class GrafoOptimizado {
+private:
+    std::vector&lt;std::vector&lt;int&gt;&gt; listaAdyacencia; 
+public:
+    void conectarEquipos(int origen, int destino) {
+        listaAdyacencia[origen].push_back(destino);
+        listaAdyacencia[destino].push_back(origen); // Bidireccional
+    }
+};</code></pre>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> La Matriz de Adyacencia es como una tabla gigante de Excel con todos los habitantes de la ciudad (desperdiciando espacio). La Lista de Adyacencia es tu celular: solo anotas a quienes realmente conoces.</div>
+        </section>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 2: Memoria Dinámica en C++</title>
+    <style>
+        :root {
+            --primary: #004b87; /* Azul institucional */
+            --secondary: #f1f8ff;
+            --accent: #d32f2f;
+            --text: #333;
+            --code-bg: #2d2d2d;
+            --code-txt: #f8f8f2;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fafafa; color: var(--text); line-height: 1.6; }
+        header { background: var(--primary); color: white; text-align: center; padding: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        main { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        section { background: white; margin-bottom: 2rem; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 6px solid var(--primary); }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        h3 { color: var(--accent); margin-top: 1.5rem; font-size: 1.1rem; }
+        pre { background: var(--code-bg); color: var(--code-txt); padding: 1.5rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; font-size: 0.95rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        code { font-family: 'Courier New', Courier, monospace; }
+        .analogy { background: var(--secondary); padding: 1.2rem; border-radius: 8px; font-style: italic; border-left: 4px solid var(--accent); margin-top: 1.5rem; }
+        
+        /* Animaciones CSS3 */
+        .anim-container { height: 140px; background: #eef2f5; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; margin: 1.5rem 0; }
+        
+        /* 1. Stack vs Heap */
+        .stack-block { width: 80px; height: 20px; background: var(--primary); margin-bottom: 2px; animation: stackBuild 3s infinite alternate; }
+        .heap-space { width: 200px; height: 100px; border: 2px dashed var(--accent); position: absolute; right: 20%; display: flex; flex-wrap: wrap; gap: 5px; padding: 5px; }
+        .heap-item { width: 25px; height: 25px; background: var(--accent); border-radius: 50%; animation: heapSpawn 2s infinite alternate; }
+        @keyframes stackBuild { 0% { height: 0; opacity: 0; } 100% { height: 80px; opacity: 1; } }
+        @keyframes heapSpawn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        /* 2. New y Delete */
+        .object-box { width: 120px; height: 60px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; animation: newDelete 4s infinite; }
+        @keyframes newDelete { 0%, 20% { opacity: 0; transform: scale(0.5); content: "NULL"; } 30%, 70% { opacity: 1; transform: scale(1); background: var(--primary); } 80%, 100% { opacity: 0; transform: scale(1.5); filter: blur(4px); background: var(--accent); } }
+
+        /* 3. Lista Simple */
+        .node { width: 60px; height: 40px; background: white; border: 2px solid var(--primary); border-radius: 5px; display: flex; align-items: center; justify-content: center; z-index: 2; position: relative; font-weight: bold; color: var(--primary);}
+        .arrow { width: 40px; height: 4px; background: var(--accent); position: relative; animation: linkFlow 2s infinite linear; }
+        .arrow::after { content: ''; position: absolute; right: 0; top: -4px; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 8px solid var(--accent); }
+        .list-wrap { display: flex; align-items: center; }
+        @keyframes linkFlow { 0% { opacity: 0.3; transform: translateX(-5px); } 50% { opacity: 1; transform: translateX(5px); } 100% { opacity: 0.3; transform: translateX(-5px); } }
+
+        /* 4. Lista Doble */
+        .arrow-double { width: 40px; height: 12px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+        .line-fwd, .line-bwd { width: 100%; height: 3px; background: var(--accent); position: relative; }
+        .line-fwd::after { content: ''; position: absolute; right: 0; top: -3px; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid var(--accent); }
+        .line-bwd::after { content: ''; position: absolute; left: 0; top: -3px; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-right: 6px solid var(--accent); }
+        
+        /* 5. Modularización */
+        .files-anim { display: flex; gap: 40px; align-items: center; justify-content: center; width: 100%; }
+        .file { width: 60px; height: 80px; background: white; border: 2px solid var(--primary); position: relative; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .file::before { content: ''; position: absolute; top: -2px; right: -2px; border-width: 0 16px 16px 0; border-style: solid; border-color: #eef2f5 #eef2f5 var(--primary) var(--primary); }
+        .file-h { border-color: var(--accent); color: var(--accent); }
+        .file-h::before { border-color: #eef2f5 #eef2f5 var(--accent) var(--accent); }
+        .transfer-dot { width: 12px; height: 12px; background: var(--primary); border-radius: 50%; animation: transfer 2s infinite ease-in-out; }
+        @keyframes transfer { 0% { transform: translateX(-40px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(40px); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Módulo 2: Estructuras Dinámicas</h1>
+        <p>Gestión de Memoria y Listas Enlazadas en C++ (Enfoque POO)</p>
+    </header>
+    <main>
+        
+        <section>
+            <h2>1. Memoria en C++: Stack vs Heap y Apuntadores</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> La memoria se divide en dos segmentos: el <em>Stack</em> (pila) gestiona variables locales de forma automática y rápida, pero con tamaño limitado. El <em>Heap</em> (montículo) permite solicitar memoria manualmente durante la ejecución para estructuras que cambian de tamaño. Para manipular el Heap, C++ utiliza apuntadores (variables que almacenan direcciones de memoria).</p>
+            
+            <div class="anim-container">
+                <div style="position: absolute; left: 20%; bottom: 10px; display: flex; flex-direction: column; align-items: center;">
+                    <div class="stack-block"></div>
+                    <b>Stack</b>
+                </div>
+                <div class="heap-space">
+                    <div class="heap-item"></div><div class="heap-item" style="animation-delay: 0.5s"></div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+class SesionPAD {
+public:
+    std::string usuario;
+    SesionPAD(std::string u) : usuario(u) {}
+};
+
+int main() {
+    // Asignación estática (Stack)
+    SesionPAD sesionLocal("Usuario Fijo"); 
+
+    // Asignación dinámica con apuntador (Heap)
+    SesionPAD* sesionDinamica = new SesionPAD("Hana chan"); 
+    
+    std::cout &lt;&lt; "Sesion en Heap: " &lt;&lt; sesionDinamica-&gt;usuario &lt;&lt; std::endl;
+    delete sesionDinamica; // Siempre liberar la memoria
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> Creamos la clase <code>SesionPAD</code>. Instanciamos <code>sesionLocal</code> directamente en el Stack (se libera sola al terminar). Luego, usamos un apuntador y el operador <code>new</code> para crear a <code>sesionDinamica</code> en el Heap. El operador <code>-&gt;</code> nos permite acceder a su atributo. Finalmente, liberamos la memoria manualmente con <code>delete</code>.</p>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> El <em>Stack</em> es el espacio fijo de la barra de tu cocina; es rápido, pero no crece. El <em>Heap</em> es como rentar una bodega externa enorme: usas el espacio que necesites para tus pasteles, pero eres responsable de vaciarla (liberar memoria) al terminar.</div>
+        </section>
+
+        <section>
+            <h2>2. Gestión de Memoria Dinámica (new y delete)</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> En C clásico se usaba <code>malloc</code> y <code>free</code>. Deitel enseña que C++ introduce los operadores seguros <code>new</code> (que reserva memoria e invoca constructores) y <code>delete</code>. Olvidar liberar esta memoria provoca "fugas de memoria" (memory leaks).</p>
+            
+            <div class="anim-container">
+                <div class="object-box">Sesion_PAD</div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+
+int main() {
+    int cantidad_turnos;
+    std::cout &lt;&lt; "¿Cuántos usuarios llegaron al módulo?: ";
+    std::cin &gt;&gt; cantidad_turnos;
+
+    // new[] sustituye a calloc/malloc
+    int* turnos = new int[cantidad_turnos]; 
+
+    for(int i = 0; i &lt; cantidad_turnos; i++) {
+        turnos[i] = 1000 + i; 
+    }
+
+    // delete[] sustituye a free, previniendo fugas de memoria
+    delete[] turnos; 
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> Le preguntamos al usuario el tamaño en tiempo de ejecución. Usamos <code>new int[cantidad_turnos]</code> para reservar dinámicamente el arreglo en el Heap. Al final, utilizamos <code>delete[]</code> (con corchetes por ser arreglo) para devolver la memoria.</p>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> Usar <code>new</code> es como rentar un molde gigante para un pastel de bodas. Usar <code>delete</code> es lavar ese molde y devolverlo a la tienda. Si nunca lo devuelves (fuga de memoria), la tienda se quedará sin moldes.</div>
+        </section>
+
+        <section>
+            <h2>3. Listas Enlazadas Simples</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Una lista enlazada es una estructura dinámica de nodos. Cada nodo encapsula un dato y un apuntador al <em>siguiente</em> nodo. Esto permite que la estructura crezca dinámicamente sin requerir memoria contigua.</p>
+            
+            <div class="anim-container">
+                <div class="list-wrap">
+                    <div class="node">N1</div><div class="arrow"></div>
+                    <div class="node">N2</div><div class="arrow"></div>
+                    <div class="node">N3</div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+class Nodo {
+public:
+    std::string tramite;
+    Nodo* siguiente; 
+    Nodo(std::string t) : tramite(t), siguiente(nullptr) {}
+};
+
+class ListaSesiones {
+private:
+    Nodo* cabeza;
+public:
+    ListaSesiones() : cabeza(nullptr) {}
+
+    void insertar(std::string tramite) {
+        Nodo* nuevo = new Nodo(tramite);
+        nuevo-&gt;siguiente = cabeza; 
+        cabeza = nuevo;
+    }
+};</code></pre>
+            <p><strong>Explicación:</strong> Creamos la clase <code>Nodo</code> que guarda el trámite y el apuntador <code>siguiente</code> inicializado en <code>nullptr</code>. La clase <code>ListaSesiones</code> protege la <code>cabeza</code>. El método <code>insertar()</code> crea un nodo en el Heap y lo enlaza al inicio de la cadena.</p>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> Como una búsqueda del tesoro. Tienes la primera pista (la cabeza) y esa pista te dice exactamente a qué coordenada ir para encontrar la <em>siguiente</em> pista, sin tenerlas todas juntas.</div>
+        </section>
+
+        <section>
+            <h2>4. Listas Doblemente Enlazadas</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Cada nodo contiene dos apuntadores: uno al nodo <em>siguiente</em> y otro al <em>anterior</em>. Esto permite el recorrido bidireccional (revisar el historial hacia adelante y hacia atrás sin reiniciar).</p>
+            
+            <div class="anim-container">
+                <div class="list-wrap">
+                    <div class="node">N1</div>
+                    <div class="arrow-double"><div class="line-fwd"></div><div class="line-bwd"></div></div>
+                    <div class="node">N2</div>
+                    <div class="arrow-double"><div class="line-fwd"></div><div class="line-bwd"></div></div>
+                    <div class="node">N3</div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+class NodoDoble {
+public:
+    std::string usuario;
+    NodoDoble* siguiente;
+    NodoDoble* anterior;
+    
+    NodoDoble(std::string u) : usuario(u), siguiente(nullptr), anterior(nullptr) {}
+};
+
+int main() {
+    NodoDoble* usr1 = new NodoDoble("Estudiante A");
+    NodoDoble* usr2 = new NodoDoble("Adulto Mayor B");
+
+    usr1-&gt;siguiente = usr2;
+    usr2-&gt;anterior = usr1; // Enlace bidireccional
+
+    delete usr1; delete usr2;
+    return 0;
+}</code></pre>
+            <p><strong>Explicación:</strong> Definimos <code>NodoDoble</code> agregando el apuntador <code>anterior</code>. Enlazamos el <code>siguiente</code> de <code>usr1</code> hacia <code>usr2</code>, y mágicamente enlazamos el <code>anterior</code> de <code>usr2</code> de regreso a <code>usr1</code>.</p>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> Es como los vagones de un tren. Si estás en el vagón comedor, puedes abrir la puerta delantera para ir al vagón de pasajeros (siguiente), pero también tienes una puerta trasera para regresar al vagón de equipaje (anterior).</div>
+        </section>
+
+        <section>
+            <h2>5. Pilas y Colas Dinámicas (Modularización)</h2>
+            <p><strong>Teoría (C++ según Deitel):</strong> Aprovechando la memoria dinámica, construimos Pilas y Colas sin tamaño fijo. C++ fomenta la Modularización separando el código en archivos <code>.h</code> (declaraciones/contratos) y <code>.cpp</code> (implementación lógica).</p>
+            
+            <div class="anim-container">
+                <div class="files-anim">
+                    <div class="file file-h">.h</div>
+                    <div class="transfer-dot"></div>
+                    <div class="file">.cpp</div>
+                </div>
+            </div>
+
+            <h3>Ejemplo en código (Incidente Crítico):</h3>
+<pre><code>// --- Archivo: ColaPAD.h (Declaración Modular) ---
+#include &lt;string&gt;
+
+struct NodoCola {
+    std::string tramite;
+    NodoCola* siguiente;
+};
+
+class ColaDinamica {
+private:
+    NodoCola* frente;
+    NodoCola* final;
+public:
+    ColaDinamica();
+    void encolar(std::string t); 
+    void desencolar();           
+};
+
+// --- Archivo: ColaPAD.cpp (Implementación) ---
+#include &lt;iostream&gt;
+// #include "ColaPAD.h"
+
+ColaDinamica::ColaDinamica() : frente(nullptr), final(nullptr) {}
+
+void ColaDinamica::encolar(std::string t) {
+    NodoCola* nuevo = new NodoCola{t, nullptr};
+    if (!final) frente = final = nuevo; 
+    else {
+        final-&gt;siguiente = nuevo; 
+        final = nuevo;
+    }
+}</code></pre>
+            <p><strong>Explicación:</strong> Demostramos la modularización separando el <code>.h</code> y el <code>.cpp</code>. La clase <code>ColaDinamica</code> encapsula los apuntadores. El método <code>encolar()</code> respeta el principio FIFO agregando nodos exclusivamente en la posición <code>final</code>.</p>
+            <div class="analogy">🍰 <strong>De la vida cotidiana:</strong> Crear archivos modulares es como un menú de restaurante. El archivo <code>.h</code> es el menú que ve el cliente (solo sabe los nombres de los platillos). El archivo <code>.cpp</code> es la cocina oculta (donde el chef implementa toda la receta).</div>
+        </section>
+
+    </main>
+</body>
+</html>
